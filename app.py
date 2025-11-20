@@ -1,35 +1,24 @@
 import streamlit as st
 import pandas as pd
 import gspread
-from oauth2client.service_account import ServiceAccountCredentials
+from google.oauth2.service_account import Credentials
 import altair as alt
-import os
-from dotenv import load_dotenv
-
-# Load environment variables
-load_dotenv()
 
 st.set_page_config(page_title="Fryer Regain Trend", layout="wide")
 
 st.title("🔥 Fryer Regain Trend Dashboard (Google Sheets Connected)")
 
 # -----------------------------
-# Load service account
+# LOAD CREDS FROM STREAMLIT SECRETS
 # -----------------------------
-credentials_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+creds_info = st.secrets["gcp_service_account"]
 
-if not credentials_path or not os.path.exists(credentials_path):
-    st.error("Missing credentials. Place service_account.json in /credentials and add path to .env")
-    st.stop()
-
-scope = [
-    "https://spreadsheets.google.com/feeds",
+credentials = Credentials.from_service_account_info(creds_info, scopes=[
     "https://www.googleapis.com/auth/spreadsheets",
-    "https://www.googleapis.com/auth/drive",
-    "https://www.googleapis.com/auth/drive.file"
-]
+    "https://www.googleapis.com/auth/drive"
+])
 
-creds = ServiceAccountCredentials.from_json_keyfile_name(credentials_path, scope)
+client = gspread.authorize(credentials)
 client = gspread.authorize(creds)
 
 # -----------------------------
