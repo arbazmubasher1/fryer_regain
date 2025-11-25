@@ -96,6 +96,40 @@ else:
         st.altair_chart(chart, use_container_width=True)
 
 # -----------------------------
+# 5B. SEPARATE BRANCH-WISE CHARTS
+# -----------------------------
+st.subheader("🏭 Branch-Wise Regain Trends")
+
+if filtered.empty:
+    st.warning("No data available for selected filters.")
+else:
+    for branch in filtered["Branch"].unique():
+        st.markdown(f"### ⭐ Branch: **{branch}**")
+
+        branch_df = filtered[filtered["Branch"] == branch]
+
+        for fryer in branch_df["Fryer ID"].unique():
+            fryer_df = branch_df[branch_df["Fryer ID"] == fryer]
+
+            chart = (
+                alt.Chart(fryer_df)
+                .mark_line(point=True)
+                .encode(
+                    x="Date:T",
+                    y="Regain Seconds:Q",
+                    color="Regain Type:N",
+                    tooltip=["Date", "Branch", "Fryer ID", "Product", "Regain Type", "Regain Seconds"]
+                )
+                .properties(
+                    title=f"{branch} — Fryer {fryer}",
+                    width=900,
+                    height=300
+                )
+            )
+
+            st.altair_chart(chart, use_container_width=True)
+
+# -----------------------------
 # 6. RAW DATA TABLE
 # -----------------------------
 st.subheader("📋 Raw Data")
